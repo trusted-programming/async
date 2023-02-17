@@ -1,0 +1,16 @@
+[package]
+name = "orion-async-macros"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = [ "h00339793 <hantingjun@huawei.com>" ]
+repository = "https://szv-open.codehub.huawei.com/innersource/rust/sandbox/orion/async"
+description = "Eliminate this constraint for performance - the local variables of asynchronous functions must implement Send Trait"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1"
+proc-macro2 = "1"
+syn = { version = "1", features = [ "full" ] }
