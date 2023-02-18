@@ -27,6 +27,31 @@
 //! test_send_future(foo());
 //!
 //! ```
+//!
+//! 可用于struct的方法
+//!
+//! ```rust
+//! use std::rc::Rc;
+//! use std::future::Future;
+//!
+//! struct Foo;
+//!
+//! impl Foo {
+//!     #[orion_async::future(body_send=true)]
+//!     async fn foo(self) -> i32 {
+//!         let val = Rc::new(100);
+//!         self.bar(*val).await
+//!     }
+//!     async fn bar(&self, val: i32) -> i32 {
+//!         val + 100
+//!     }
+//! }
+//! fn test_send_future<T: Future + Send>(t: T) {
+//! }
+//!
+//! let foo = Foo;
+//! test_send_future(foo.foo());
+//! ```
 //!  
 
 use std::future::{ Future };

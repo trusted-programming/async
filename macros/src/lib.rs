@@ -7,7 +7,7 @@ extern crate proc_macro;
 
 use proc_macro::{ TokenStream };
 use quote::{ quote, ToTokens };
-use proc_macro2::{ Ident, Span };
+use proc_macro2::{ Span };
 use syn::{
     parse_macro_input,
     ItemFn, AttributeArgs,
@@ -106,45 +106,16 @@ pub fn future(args: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 fn send_future(input: &mut ItemFn) -> TokenStream {
-    let mut inner = input.clone();
-
-    let name = format!("_1234_{}", inner.sig.ident.to_string());
-    let fn_ident = Ident::new(&name, inner.sig.ident.span());
-
-    inner.sig.ident = fn_ident.clone();
-    inner.attrs.clear(); 
-    inner.vis = syn::Visibility::Inherited;
-    
-    input.block.stmts.clear();
-    input.block.stmts.push(syn::Stmt::Item(syn::Item::Fn(inner)));
-
-    let args: Vec<proc_macro2::TokenStream> = input.sig.inputs.iter().map(|arg| {
-        match arg {
-            syn::FnArg::Receiver(_) => {
-                let ident = Ident::new("self", input.sig.ident.span());
-                quote!(#ident)
-            },
-            syn::FnArg::Typed(ref arg) => {
-                match &*arg.pat {
-                    syn::Pat::Ident(ident) => {
-                        let ident = &ident.ident;
-                        quote!(#ident)
-                    }
-                    _ => {
-                        let msg = "failed to parse argument";
-                        return syn::Error::new_spanned(arg, msg).into_compile_error().into();
-                    }
-                }
-            },
-        }
-    }).collect();
-
+    let body = input.block.to_token_stream();
     let tokens: TokenStream = quote!({
-        let future = unsafe { orion_async::SendFuture::new(#fn_ident(#(#args),*)) };
+        let future = unsafe {
+            orion_async::SendFuture::new(async { #body })
+        };
         future.await
     }).into();
 
     let wrapper = parse_macro_input!(tokens as syn::Stmt);
+    input.block.stmts.clear();
     input.block.stmts.push(wrapper);
 
     input.to_token_stream().into()

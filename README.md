@@ -59,7 +59,43 @@ async fn bar(id: i32) {
 }
 
 ```
+
+也支持struct的async方法.
+
+```rust
+use std::rc::Rc;
+
+#[tokio::main]
+async fn main() {
+    let foo = Foo;
+    let val = tokio::spawn(foo.foo()).await.unwrap();
+    println!("val = {}", val);
+}
+
+struct Foo;
+
+impl Foo {
+    #[orion_async::future(body_send = true)]
+    async fn foo(self) -> i32 {
+        let val = Rc::new(100);
+        tokio::spawn(Foo::bar(*val)).await.unwrap()
+    }
+    async fn bar(val: i32) -> i32 {
+        val + 100
+    }
+}
+
+```
+
 # 使用方法
+
+```rust
+#[orion_async::future(body_send = true)]
+async fn foo() {
+   ...
+}
+
+```
 
 此过程宏只能作用于异步函数，且只能消除异步函数内部变量可使用不支持Send Trait的数据类型的约束，不会改变函数输入参数的任何约束。
 

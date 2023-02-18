@@ -1,7 +1,7 @@
 
 [package]
 name = "orion-async"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = [ "h00339793 <hantingjun@huawei.com>" ]
@@ -11,7 +11,7 @@ description = "Eliminate this constraint for performance - the local variables o
 [lib]
 
 [dependencies]
-orion-async-macros = { path = "macros", version = "0.1" }
+orion-async-macros = { path = "macros", version = "0.2" }
 
 [workspace]
 members = [ "macros" ]
